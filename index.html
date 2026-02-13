@@ -25,17 +25,24 @@
     <!-- ASK SCREEN -->
     <section id="askScreen" class="screen">
       <div class="card">
-        <img
+        <!-- ✅ Switched from IMG (gif) to VIDEO (mp4) -->
+        <video
           id="imageDisplay"
-          src="./images/image1.gif"
-          alt="Cute dancing duck with hearts"
           class="hero-img"
-        />
+          autoplay
+          loop
+          muted
+          playsinline
+          preload="auto"
+        >
+          <!-- default / initial clip -->
+          <source src="./images/image1.mp4" type="video/mp4" />
+        </video>
 
         <h2 id="valentineQuestion" class="question">
           Ho hola mi jaimito...
         </h2>
-         <h3 id="valentineQuestion" class="question2">
+        <h3 id="valentineQuestion2" class="question2">
           ¿Quisieras ser mi san valentin?
         </h3>
 
@@ -58,9 +65,9 @@
         </p>
 
         <div class="timeline-wrap" id="timelineWrap">
-  <div class="timeline-line"></div>
-  <div class="timeline-track" id="timelineTrack"></div>
-</div>
+          <div class="timeline-line"></div>
+          <div class="timeline-track" id="timelineTrack"></div>
+        </div>
 
         <div class="timeline-footer">
           <button id="replayConfetti" class="btn btn-yes small">Más confetti</button>

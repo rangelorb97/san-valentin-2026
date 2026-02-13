@@ -6,7 +6,10 @@ const timelineScreen = document.getElementById("timelineScreen");
 
 const yesButton = document.getElementById("yesButton");
 const noButton = document.getElementById("noButton");
+
+// NOTE: now this is a <video>
 const imageDisplay = document.getElementById("imageDisplay");
+
 const valentineQuestion = document.getElementById("valentineQuestion");
 const responseButtons = document.getElementById("responseButtons");
 
@@ -17,14 +20,14 @@ const backBtn = document.getElementById("backBtn");
 // ===============================
 // ASSETS
 // ===============================
-const imagePaths = [
-  "./images/image1.gif",
-  "./images/image2.gif",
-  "./images/image3.gif",
-  "./images/image4.gif",
-  "./images/image5.gif",
-  "./images/image6.gif",
-  "./images/image7.gif",
+const videoPaths = [
+  "./images/image1.mp4",
+  "./images/image2.mp4",
+  "./images/image3.mp4",
+  "./images/image4.mp4",
+  "./images/image5.mp4",
+  "./images/image6.mp4",
+  "./images/image7.mp4",
 ];
 
 const CLICK_SOUND = "./sounds/click.mp3";
@@ -51,6 +54,50 @@ function playSound(soundPath) {
 function clamp(n, min, max) {
   return Math.max(min, Math.min(max, n));
 }
+
+// Swap the <video> source smoothly
+async function setDisplayVideo(src) {
+  try {
+    imageDisplay.pause();
+  } catch (_) {}
+
+  // Setting src directly is more reliable than messing with <source> nodes
+  imageDisplay.src = src;
+  imageDisplay.load();
+
+  // Try to play; on mobile it generally works because it's user-initiated click
+  try {
+    await imageDisplay.play();
+  } catch (_) {
+    // If autoplay restrictions hit (rare after click), ignore
+  }
+}
+
+// Preload videos so swaps are faster on mobile
+function preloadVideos(paths) {
+  // We preload with <link rel="preload"> (best for Netlify/CDN) + "warm" via <video>
+  paths.forEach((p) => {
+    const link = document.createElement("link");
+    link.rel = "preload";
+    link.as = "video";
+    link.href = p;
+    document.head.appendChild(link);
+  });
+
+  // Warm up by requesting metadata (low cost) so the browser knows the files
+  paths.forEach((p) => {
+    const v = document.createElement("video");
+    v.preload = "metadata";
+    v.src = p;
+    // no need to append; just creating it triggers fetch in many browsers
+  });
+}
+
+// Kick off preload early
+preloadVideos(videoPaths);
+
+// Ensure initial video is correct even if HTML source changes later
+setDisplayVideo(videoPaths[0]);
 
 // ===============================
 // SOFT FLOATING HEARTS
@@ -87,8 +134,8 @@ function spawnHeart() {
 setInterval(spawnHeart, 1200);
 
 // ===============================
-// NO BUTTON CLICK LOGIC (back to original style)
-// - click "No" => text changes, YES grows, image changes
+// NO BUTTON CLICK LOGIC (same as before)
+// - click "No" => text changes, YES grows, video changes
 // - at 4th click, replace with "runaway" button that escapes hover/click
 // ===============================
 let runawayButtonCreated = false;
@@ -100,9 +147,8 @@ function createRunawayButton() {
   const newButton = document.createElement("button");
   newButton.id = "runawayButton";
   newButton.textContent = "NO SE PUEDE UN NOOO";
-  newButton.className = "btn btn-no"; // uses your CSS button style
+  newButton.className = "btn btn-no";
 
-  // Put it near the original buttons area first (without overlapping)
   newButton.style.position = "fixed";
   newButton.style.zIndex = "9999";
 
@@ -110,10 +156,9 @@ function createRunawayButton() {
   const startLeft = yesRect.left + yesRect.width + 14;
   const startTop = yesRect.top;
 
-  newButton.style.left = `${Math.min(startLeft, window.innerWidth - 160)}px`;
+  newButton.style.left = `${Math.min(startLeft, window.innerWidth - 200)}px`;
   newButton.style.top = `${Math.min(startTop, window.innerHeight - 70)}px`;
 
-  // Replace old No button with runaway
   const oldNo = document.getElementById("noButton");
   if (oldNo) oldNo.replaceWith(newButton);
 
@@ -134,7 +179,6 @@ function createRunawayButton() {
     });
   };
 
-  // Escape on hover & click
   newButton.addEventListener("mouseover", moveButton);
   newButton.addEventListener("click", () => {
     playSound(CLICK_SOUND);
@@ -142,14 +186,14 @@ function createRunawayButton() {
   });
 }
 
-noButton.addEventListener("click", () => {
+noButton.addEventListener("click", async () => {
   playSound(CLICK_SOUND);
 
-  // increment clicks (cap)
   if (noClickCount < 6) noClickCount++;
 
-  // image changes
-  imageDisplay.src = imagePaths[Math.min(noClickCount, imagePaths.length - 1)];
+  // ✅ video changes (instead of gif)
+  const idx = Math.min(noClickCount, videoPaths.length - 1);
+  await setDisplayVideo(videoPaths[idx]);
 
   // YES grows
   const growPx = 22;
@@ -172,7 +216,6 @@ noButton.addEventListener("click", () => {
     "NO SE PUEDE UN NOOO",
   ];
 
-  // At 4th click => replace with runaway
   if (noClickCount >= 4) {
     createRunawayButton();
   } else {
@@ -181,7 +224,7 @@ noButton.addEventListener("click", () => {
 });
 
 // ===============================
-// TIMELINE DATA (EDIT THIS to make it personal)
+// TIMELINE DATA
 // ===============================
 const timelineItems = [
   { year: "2019", title: "Cádiz ✨", text: "Nos conocimos, y de ahi en adelante...", img: "./images/2019.jpg" },
@@ -196,9 +239,6 @@ const timelineItems = [
 
 // ===============================
 // BUILD TIMELINE
-// NOTE: your HTML/CSS version moved timeline-line into the wrap.
-// If your HTML still injects the line here, it won't break anything,
-// but ideally remove the line creation here if it's already in HTML.
 // ===============================
 function renderTimeline() {
   timelineTrack.innerHTML = "";
@@ -209,7 +249,7 @@ function renderTimeline() {
 
     node.innerHTML = `
       <div class="node-dot"></div>
-      <div class="node-title">${item.year} </div>
+      <div class="node-title">${item.year}</div>
       <div class="node-text">${item.text}</div>
       ${item.img ? `<img class="node-img" src="${item.img}" alt="${item.title}">` : ""}
     `;
@@ -220,7 +260,7 @@ function renderTimeline() {
 renderTimeline();
 
 // ===============================
-// DRAGGABLE TIMELINE (POINTER EVENTS) ✅
+// DRAGGABLE TIMELINE (POINTER EVENTS)
 // ===============================
 let isDragging = false;
 let pointerId = null;
@@ -309,7 +349,6 @@ function fireConfetti() {
 yesButton.addEventListener("click", async () => {
   playSound(CLICK_SOUND);
 
-  // fade-in music (optional)
   try {
     await bgMusic.play();
     anime({
@@ -320,11 +359,9 @@ yesButton.addEventListener("click", async () => {
     });
   } catch (_) {}
 
-  // Switch screens
   askScreen.classList.add("hidden");
   timelineScreen.classList.remove("hidden");
 
-  // Nice entrance animation
   timelineScreen.style.opacity = "0";
   timelineScreen.style.transform = "translateY(10px)";
   anime({
@@ -337,7 +374,6 @@ yesButton.addEventListener("click", async () => {
 
   fireConfetti();
 
-  // reset timeline position nicely (after layout is visible)
   requestAnimationFrame(() => {
     setTrackX(0);
   });
@@ -353,7 +389,6 @@ backBtn.addEventListener("click", () => {
   timelineScreen.classList.add("hidden");
   askScreen.classList.remove("hidden");
 
-  // stop music softly
   anime.remove(bgMusic);
   anime({
     targets: bgMusic,
