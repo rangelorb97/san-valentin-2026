@@ -1,43 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Valentine's Day</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
-  <style>
-    .gradient-background {
-      background: linear-gradient(180deg, rgba(255, 208, 229, 1) 0%, rgba(255, 232, 242, 1) 36%, rgba(255, 255, 255, 1) 100%);
-    }
-    .bounce2 {
-      animation: bounce2 2s ease infinite;
-    }
-    @keyframes bounce2 {
-      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-      40% { transform: translateY(-20px); }
-      60% { transform: translateY(-10px); }
-    }
-  </style>
-</head>
-<body class="gradient-background">
-  <div class="flex items-center justify-center h-screen">
-    <div class="flex flex-col items-center p-4 text-center">
-      <img id="imageDisplay" src="./images/image1.gif" alt="Cute dancing duck with hearts" class="rounded-md h-[300px]" style="object-fit: cover;" />
-      <h2 id="valentineQuestion" class="text-4xl font-bold italic text-[#bd1e59] my-4 text-center">Will you be my Valentine?</h2>
-      <div class="flex gap-4 pt-[20px] items-center" id="responseButtons">
-        <button id="yesButton"
-          class="bounce2 inline-flex items-center justify-center whitespace-nowrap rounded-md text-[20px] font-medium hover:bg-green-400 min-h-12 min-w-[75px] px-4 py-2 bg-green-500 text-white transition">
-          Yes
-        </button>
-        <button id="noButton"
-          class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-[20px] font-medium hover:bg-red-700 h-12 min-w-[75px] w-auto px-4 py-2 bg-red-500 text-white">
-          No
-        </button>
-      </div>
-    </div>
-  </div>
 
-  <script type="module" src="./script.js"></script>
+  <!-- Tailwind (optional, you already use it) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Anime.js (for smooth motion) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+
+  <!-- Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body class="gradient-background">
+  <!-- Soft floating hearts -->
+  <div id="heartsLayer" aria-hidden="true"></div>
+
+  <main class="page">
+    <!-- ASK SCREEN -->
+    <section id="askScreen" class="screen">
+      <div class="card">
+        <img
+          id="imageDisplay"
+          src="./images/image1.gif"
+          alt="Cute dancing duck with hearts"
+          class="hero-img"
+        />
+
+        <h2 id="valentineQuestion" class="question">
+          Ho hola mi jaimito...
+        </h2>
+         <h3 id="valentineQuestion" class="question2">
+          ¿Quisieras ser mi san valentin?
+        </h3>
+
+        <div class="buttons" id="responseButtons">
+          <button id="yesButton" class="btn btn-yes bounce2">Sí</button>
+          <button id="noButton" class="btn btn-no">No</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TIMELINE SCREEN -->
+    <section id="timelineScreen" class="screen hidden">
+      <div class="card timeline-card">
+        <h2 class="question">
+          Mi Forever Valentine 💗
+        </h2>
+
+        <p class="subhint">
+          Nuestro timeline juntos✨
+        </p>
+
+        <div class="timeline-wrap" id="timelineWrap">
+  <div class="timeline-line"></div>
+  <div class="timeline-track" id="timelineTrack"></div>
+</div>
+
+        <div class="timeline-footer">
+          <button id="replayConfetti" class="btn btn-yes small">Más confetti</button>
+          <button id="backBtn" class="btn btn-no small">Atrás</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="./script.js" defer></script>
 </body>
 </html>
